@@ -49,11 +49,6 @@ def ask(question, choices=None, lowercase=None):
     if choices is None or answer in choices:
       return answer
 
-def run(cmd, args):
-  if args.debug:
-    print('run: {}'.format(cmd))
-  subprocess.run(cmd, shell = True, capture_output = not args.verbose)
-
 def main(args):
   if os.path.exists(args.output_location):
     print('{} already exists'.format(args.output_location))
@@ -73,6 +68,8 @@ def main(args):
   url = 'https://github.com/nicmcd/sst-template/archive/main.tar.gz'
   tmpdir = tempfile.mkdtemp()
   tarball = os.path.join(tmpdir, 'main.tar.gz')
+  if args.debug:
+    print('downloading ' + tarball)
   urllib.request.urlretrieve(url, tarball)
   prefix = 'sst-template-main/'
   with tarfile.open(tarball) as fd:
@@ -81,6 +78,8 @@ def main(args):
       if member.name.startswith(prefix):
         member.name = member.name[len(prefix):]
         members.append(member)
+    if args.debug:
+      print('extracting ' + tarball)
     fd.extractall(args.output_location, members)
 
   # Performs find and replace on file content, file names, and directory names
@@ -94,7 +93,9 @@ def main(args):
   ]
   for dirpath, dirnames, filenames in os.walk(args.output_location,
                                               topdown=False):
-    print('{} {} {}'.format(dirpath, dirnames, filenames))
+    if args.debug:
+      print('formatting ' + dirpath)
+
     # Check file contents
     for pathname in filenames:
       pathname = os.path.join(dirpath, pathname)
@@ -108,12 +109,14 @@ def main(args):
           print('writing ' + pathname)
         with open(pathname, 'w') as fd:
           fd.write(new_text)
+
     # Check directory and filenames for renaming
     for pathname in dirnames + filenames:
       for replacement_from, replacement_to in replacements:
         if pathname.find(replacement_from) >= 0:
           fullpath = os.path.join(dirpath, pathname)
-          print('renaming ' + fullpath)
+          if args.debug:
+            print('renaming ' + fullpath)
           new_fullpath = fullpath.replace(replacement_from, replacement_to)
           shutil.move(fullpath, new_fullpath)
           pathname = pathname.replace(replacement_from, replacement_to)
