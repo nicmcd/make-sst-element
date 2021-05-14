@@ -59,5 +59,6 @@ setup(
   author_email='n.mcdonald83@gmail.com',
   license='BSD',
   url='http://github.com/nicmcd/make-sst-element',
+  packages=['make_sst_element'],
   scripts=['bin/make-sst-element'],
 )
