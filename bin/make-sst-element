@@ -33,6 +33,7 @@
 
 import argparse
 import datetime
+import make_sst_element
 import os
 import readline
 import shutil
@@ -50,6 +51,10 @@ def ask(question, choices=None, lowercase=None):
       return answer
 
 def main(args):
+  if args.version:
+    print(make_sst_element.__version__)
+    exit(0)
+
   if os.path.exists(args.output_location):
     print('{} already exists'.format(args.output_location))
     exit(-1)
@@ -128,5 +133,7 @@ if __name__ == '__main__':
                   help='Output directory to be created')
   ap.add_argument('-d', '--debug', action='store_true',
                   help='Show debug information during execution')
+  ap.add_argument('-v', '--version', action='store_true',
+                  help='Show the version and exit')
   args = ap.parse_args()
   main(args)
